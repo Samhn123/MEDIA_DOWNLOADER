@@ -13,3 +13,7 @@ A simple yet powerful web-based Media Downloader that allows users to download v
 Frontend: HTML, CSS, JavaScript
 Backend: Node.js, Express
 Tools: yt-dlp, FFmpeg
+
+## 🖼️ Preview
+
+![App Preview](image.png)
