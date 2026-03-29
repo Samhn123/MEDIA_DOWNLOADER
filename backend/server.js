@@ -15,11 +15,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
-// port (Render ke liye zaroori)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
 
 // 📁 Download folder
 const DOWNLOADS = path.join(__dirname, "downloads");
