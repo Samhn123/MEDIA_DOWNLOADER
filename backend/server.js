@@ -3,10 +3,23 @@ const cors = require("cors");
 const { exec } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// frontend folder serve karega
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// default route (IMPORTANT)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+});
+
+// port (Render ke liye zaroori)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 // 📁 Download folder
 const DOWNLOADS = path.join(__dirname, "downloads");
