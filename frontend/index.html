@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Media Downloader</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+}
+
+/* 📦 Card */
+.card {
+    background: white;
+    width: 100%;
+    max-width: 420px;
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: fadeIn 0.5s ease;
+}
+
+/* 📱 Heading */
+h2 {
+    font-size: 22px;
+}
+
+p {
+    font-size: 14px;
+    color: gray;
+    margin-bottom: 15px;
+}
+
+/* 🧾 Inputs */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* 🎯 Button */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #43a047;
+}
+
+/* 📊 Progress */
+.progress {
+    width: 100%;
+    background: #eee;
+    border-radius: 10px;
+    margin-top: 15px;
+    display: none;
+}
+
+.progress-bar {
+    height: 8px;
+    width: 0%;
+    background: #4CAF50;
+    border-radius: 10px;
+    transition: width 0.3s;
+}
+
+/* 📢 Status */
+.status {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* 🎬 Animation */
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* 📱 MOBILE OPTIMIZATION */
+@media (max-width: 480px) {
+    .card {
+        padding: 20px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    input, select, button {
+        font-size: 13px;
+        padding: 10px;
+    }
+}
+
+/* 📲 TABLET */
+@media (min-width: 768px) {
+    .card {
+        max-width: 500px;
+        padding: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>⬇️ Media Downloader</h2>
+    <p>Download videos from YouTube, Instagram & more</p>
+
+    <input type="text" id="url" placeholder="Paste video URL here">
+
+    <select id="format">
+        <option value="mp4">Video (MP4)</option>
+        <option value="mp3">Audio (MP3)</option>
+    </select>
+
+    <select id="quality">
+        <option value="best">Best Quality</option>
+        <option value="360">360p</option>
+        <option value="720">720p</option>
+        <option value="1080">1080p</option>
+    </select>
+
+    <button onclick="download()">Download</button>
+
+    <div class="progress" id="progressBox">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="status" id="status"></div>
+</div>
+
+<script>
+async function download() {
+    const url = document.getElementById("url").value;
+    const format = document.getElementById("format").value;
+    const quality = document.getElementById("quality").value;
+
+    const status = document.getElementById("status");
+    const progressBox = document.getElementById("progressBox");
+    const progressBar = document.getElementById("progressBar");
+
+    if (!url) {
+        status.innerText = "❌ Enter URL";
+        return;
+    }
+
+    status.innerText = "⏳ Downloading...";
+    progressBox.style.display = "block";
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = progress + "%";
+        if (progress >= 90) clearInterval(interval);
+    }, 400);
+
+    try {
+        const response = await fetch("http://localhost:5000/download", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ url, format, quality })
+        });
+
+        const blob = await response.blob();
+
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = format === "mp3" ? "audio.mp3" : "video.mp4";
+        a.click();
+
+        progressBar.style.width = "100%";
+        status.innerText = "✅ Download completed!";
+    } catch (err) {
+        status.innerText = "❌ Error!";
+    }
+}
+</script>
+
+</body>
+</html>
