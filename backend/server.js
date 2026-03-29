@@ -16,7 +16,6 @@ app.get("/", (req, res) => {
 });
 
 
-
 // 📁 Download folder
 const DOWNLOADS = path.join(__dirname, "downloads");
 
@@ -40,8 +39,8 @@ app.post("/download", (req, res) => {
 
     // 🎵 MP3 Download
     if (format === "mp3") {
-        command = `yt-dlp -x --audio-format mp3 --ffmpeg-location "C:\\\\ffmpeg\\\\bin" -o "${outputTemplate}" "${url}"`;
-    } 
+    command = `yt-dlp -f bestaudio -o "${outputTemplate}" "${url}"`;
+}
     // 🎬 MP4 Download with Quality
     else {
         let qualityFormat = "best";
