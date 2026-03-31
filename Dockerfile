@@ -1,28 +1,25 @@
 FROM python:3.11-slim
 
-# Install dependencies
+# 🔥 Node.js install
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    ffmpeg \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    ffmpeg \
+    nodejs \
+    npm
 
-RUN pip install yt-dlp
-
-# Install yt-dlp (binary तरीका - BEST)
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
-    -o /usr/local/bin/yt-dlp \
-    && chmod a+rx /usr/local/bin/yt-dlp
-
-# Verify install (important)
-RUN yt-dlp --version
+# 🔥 yt-dlp install
+RUN pip install -U yt-dlp
 
 WORKDIR /app
 
+# 🔥 package.json copy
 COPY package*.json ./
+
+# 🔥 npm install (अब काम करेगा)
 RUN npm install
 
+# 🔥 बाकी files copy
 COPY . .
 
+# 🔥 start app
 CMD ["npm", "start"]
