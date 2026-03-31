@@ -184,25 +184,27 @@ async function download() {
         if (progress >= 90) clearInterval(interval);
     }, 400);
 
-    try {
-        const response = await fetch("http://localhost:5000/download", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ url, format, quality })
-        });
-
-        const blob = await response.blob();
-
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = format === "mp3" ? "audio.mp3" : "video.mp4";
-        a.click();
-
-        progressBar.style.width = "100%";
-        status.innerText = "✅ Download completed!";
-    } catch (err) {
-        status.innerText = "❌ Error!";
-    }
+    fetch("/download", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    url: videoUrl,
+    format: format,
+    quality: quality
+  })
+})
+.then(res => {
+  if (!res.ok) throw new Error("Download failed");
+  return res.blob();
+})
+.then(blob => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "video.mp4";
+  a.click();
+});
 }
 </script>
 
