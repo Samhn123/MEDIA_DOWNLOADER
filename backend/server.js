@@ -56,10 +56,12 @@ app.post("/download", (req, res) => {
   console.log("Running command:", command);
 
   exec(command, (error, stdout, stderr) => {
+    console.log("STDOUT:", stdout);
+    console.log("STDERR:", stderr);
+
     if (error) {
-      console.error("Error:", error);
-      console.error(stderr);
-      return res.status(500).json({ error: "Download failed" });
+        console.error("Error:", error);
+        return res.status(500).json({ error: stderr || "Download failed" });
     }
 
     // 📂 Find downloaded file
@@ -77,7 +79,7 @@ app.post("/download", (req, res) => {
       if (err) {
         console.error("Download error:", err);
       }
-
+      
       // 🧹 Delete file after download
       fs.unlink(filePath, () => {});
     });
