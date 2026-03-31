@@ -40,7 +40,10 @@ app.post("/download", (req, res) => {
   // 🎵 MP3 Download (FIXED)
   if (format === "mp3") {
     command = `/usr/local/bin/yt-dlp -x --audio-format mp3 \
---cookies backend/cookies.txt \
+--cookies "${cookiesPath}" \
+--user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+--extractor-args "youtube:player_client=android" \
+--no-check-certificates \
 -o "${outputTemplate}" "${url}"`;
   }
 

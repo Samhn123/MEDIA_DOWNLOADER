@@ -1,4 +1,4 @@
-FROM node:18
+FROM python:3.11-slim
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip install yt-dlp
 
 # Install yt-dlp (binary तरीका - BEST)
 RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
