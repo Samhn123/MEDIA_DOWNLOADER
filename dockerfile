@@ -1,17 +1,26 @@
 FROM node:18
 
-# Install python + pip + ffmpeg + yt-dlp
-RUN apt-get update && apt-get install -y python3 python3-pip ffmpeg \
-    && pip3 install yt-dlp
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# App folder
+# Install yt-dlp (binary तरीका - BEST)
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+    -o /usr/local/bin/yt-dlp \
+    && chmod a+rx /usr/local/bin/yt-dlp
+
+# Verify install (important)
+RUN yt-dlp --version
+
 WORKDIR /app
 
-# Copy files
 COPY package*.json ./
 RUN npm install
 
 COPY . .
 
-# Start server
 CMD ["npm", "start"]

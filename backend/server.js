@@ -39,7 +39,7 @@ app.post("/download", (req, res) => {
 
   // 🎵 MP3 Download (FIXED)
   if (format === "mp3") {
-    command = `yt-dlp -x --audio-format mp3 -o "${outputTemplate}" "${url}"`;
+    command = `/usr/local/bin/yt-dlp -x --audio-format mp3 -o "${outputTemplate}" "${url}"`;
   }
 
   // 🎬 MP4 Download (FIXED)
@@ -50,7 +50,7 @@ app.post("/download", (req, res) => {
     if (quality === "720") qualityFormat = "bestvideo[height<=720]+bestaudio";
     if (quality === "1080") qualityFormat = "bestvideo[height<=1080]+bestaudio";
 
-    command = `yt-dlp -f "${qualityFormat}" -o "${outputTemplate}" "${url}"`;
+    command = `/usr/local/bin/yt-dlp -f "${qualityFormat}" -o "${outputTemplate}" "${url}"`;
   }
 
   console.log("Running command:", command);
