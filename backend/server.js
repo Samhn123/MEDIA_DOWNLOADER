@@ -40,10 +40,7 @@ app.post("/download", (req, res) => {
   // 🎵 MP3 Download (FIXED)
   if (format === "mp3") {
     command = `/usr/local/bin/yt-dlp -x --audio-format mp3 \
---no-check-certificate \
---no-warnings \
---geo-bypass \
---user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+--cookies backend/cookies.txt \
 -o "${outputTemplate}" "${url}"`;
   }
 
@@ -56,12 +53,9 @@ app.post("/download", (req, res) => {
     if (quality === "1080") qualityFormat = "bestvideo[height<=1080]+bestaudio";
 
    command = `/usr/local/bin/yt-dlp \
+--cookies backend/cookies.txt \
 -f "bestvideo+bestaudio/best" \
 --merge-output-format mp4 \
---no-check-certificate \
---no-warnings \
---geo-bypass \
---user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
 -o "${outputTemplate}" "${url}"`;
   }
 
