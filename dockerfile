@@ -1,9 +1,8 @@
 FROM node:18
 
 # Install python + pip + ffmpeg + yt-dlp
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip ffmpeg && \
-    pip3 install yt-dlp
+RUN apt-get update && apt-get install -y python3 python3-pip ffmpeg \
+    && pip3 install yt-dlp
 
 # App folder
 WORKDIR /app
@@ -14,5 +13,5 @@ RUN npm install
 
 COPY . .
 
-# Start app
-CMD ["node", "backend/server.js"]
+# Start server
+CMD ["npm", "start"]
