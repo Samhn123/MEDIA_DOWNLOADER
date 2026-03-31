@@ -164,14 +164,17 @@ async function downloadVideo() {
   const url = document.getElementById("url").value;
   const format = document.getElementById("format").value;
   const quality = document.getElementById("quality").value;
+  const status = document.getElementById("status");
 
   if (!url) {
-    alert("Please enter URL");
+    status.innerText = "❌ Please enter URL";
     return;
   }
 
   try {
-    const res = await fetch("/download", {   // ✅ FIX HERE
+    status.innerText = "⏳ Downloading...";
+
+    const res = await fetch("/download", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -185,11 +188,13 @@ async function downloadVideo() {
 
     if (!res.ok) {
       const err = await res.json();
-      alert(err.error);
+      status.innerText = "❌ Error: " + err.error;
       return;
     }
 
     const blob = await res.blob();
+
+    status.innerText = "✅ Download Complete";
 
     const a = document.createElement("a");
     a.href = window.URL.createObjectURL(blob);
@@ -198,7 +203,7 @@ async function downloadVideo() {
 
   } catch (error) {
     console.error(error);
-    alert("Download failed");
+    status.innerText = "❌ Download failed";
   }
 }
 </script>

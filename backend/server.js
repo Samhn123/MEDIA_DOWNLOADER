@@ -1,103 +1,82 @@
 const express = require("express");
-const cors = require("cors");
 const { exec } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
 const app = express();
-
-app.use(cors());
 app.use(express.json());
 
-// 📁 Frontend serve
+// 📁 Static files serve
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
-});
+// 📥 Download API
+app.post("/download", (req, res) => {
+    const { url, format, quality } = req.body;
 
-// 📁 Download folder
-const DOWNLOADS = path.join(__dirname, "downloads");
+    if (!url) {
+        return res.status(400).json({ error: "URL required" });
+    }
 
-// Create folder if not exists
-if (!fs.existsSync(DOWNLOADS)) {
-  fs.mkdirSync(DOWNLOADS);
+    // ✅ cookies path FIX
+    const cookiesPath = path.join(__dirname, "cookies.txt");
+
+
+// 📁 downloads folder ensure
+const downloadsDir = path.join(__dirname, "downloads");
+if (!fs.existsSync(downloadsDir)) {
+    fs.mkdirSync(downloadsDir);
 }
 
-// 🎯 Download API
-app.post("/download", (req, res) => {
-  const { url, format = "mp4", quality = "best" } = req.body;
+  // 📁 output file
+const fileName = `file_${Date.now()}`;
+const outputTemplate = path.join(downloadsDir, `${fileName}.%(ext)s`);
 
-  if (!url) {
-    return res.status(400).json({ error: "URL is required" });
-  }
+   // ✅ Windows + Railway compatible yt-dlp path
+const ytdlpPath = process.platform === "win32" ? "yt-dlp" : "/usr/local/bin/yt-dlp";
 
-  const fileName = `file_${Date.now()}`;
-  const outputTemplate = path.join(DOWNLOADS, `${fileName}.%(ext)s`);
+// 🎯 yt-dlp command
+let command;
 
-  let command;
-
-  // 🎵 MP3 Download (FIXED)
-  if (format === "mp3") {
-    command = `/usr/local/bin/yt-dlp -x --audio-format mp3 \
+if (format === "mp3") {
+    command = `${ytdlpPath} -x --audio-format mp3 \
 --cookies "${cookiesPath}" \
---user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
 --extractor-args "youtube:player_client=android" \
---no-check-certificates \
 -o "${outputTemplate}" "${url}"`;
-  }
-
-  // 🎬 MP4 Download (FIXED)
-  else {
-    let qualityFormat = "best";
-
-    if (quality === "360") qualityFormat = "bestvideo[height<=360]+bestaudio";
-    if (quality === "720") qualityFormat = "bestvideo[height<=720]+bestaudio";
-    if (quality === "1080") qualityFormat = "bestvideo[height<=1080]+bestaudio";
-
-   command = `/usr/local/bin/yt-dlp \
---cookies backend/cookies.txt \
--f "bestvideo+bestaudio/best" \
---merge-output-format mp4 \
+} else {
+    command = `${ytdlpPath} -f "bestvideo+bestaudio/best" \
+--cookies "${cookiesPath}" \
+--extractor-args "youtube:player_client=android" \
 -o "${outputTemplate}" "${url}"`;
-  }
+}
 
-  console.log("Running command:", command);
+    console.log("Running command:", command);
 
-  exec(command, (error, stdout, stderr) => {
-    console.log("STDOUT:", stdout);
-    console.log("STDERR:", stderr);
+    exec(command, (error, stdout, stderr) => {
+        console.log("STDOUT:", stdout);
+        console.error("STDERR:", stderr);
 
-    if (error) {
-        console.error("Error:", error);
-        return res.status(500).json({ error: stderr || "Download failed" });
-    }
+        if (error) {
+            return res.status(500).json({ error: "Download failed" });
+        }
 
-    // 📂 Find downloaded file
-    const files = fs.readdirSync(DOWNLOADS);
-    const downloadedFile = files.find((f) => f.startsWith(fileName));
+        // 📁 Find downloaded file
+        const ext = format === "mp3" ? "mp3" : "mp4";
+        const filePath = path.join(__dirname, "downloads", `${fileName}.${ext}`);
 
-    if (!downloadedFile) {
-      return res.status(500).json({ error: "File not found" });
-    }
+        // 📤 Send file
+        res.download(filePath, err => {
+            if (err) {
+                console.error(err);
+            }
 
-    const filePath = path.join(DOWNLOADS, downloadedFile);
-
-    // 📤 Send file
-    res.download(filePath, downloadedFile, (err) => {
-      if (err) {
-        console.error("Download error:", err);
-      }
-      
-      // 🧹 Delete file after download
-      fs.unlink(filePath, () => {});
+            // 🧹 cleanup
+            fs.unlink(filePath, () => {});
+        });
     });
-  });
 });
 
-// 🚀 Start server (FIXED for Railway)
-const PORT = process.env.PORT || 5000;
-
+// 🚀 Server start
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`🔥 Server running on port ${PORT}`);
+    console.log(`🔥 Server running on port ${PORT}`);
 });
